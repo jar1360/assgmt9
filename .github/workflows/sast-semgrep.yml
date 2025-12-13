@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TARGET_FILE: "assgmt9/canon"
+      TARGET_FILE: "assgmt9/canonicalization_example"
     
     permissions:
       contents: read 
