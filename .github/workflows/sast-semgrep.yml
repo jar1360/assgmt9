@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TARGET_FILE: "assgmt9/idor"
+      TARGET_FILE: "assgmt9/canon"
     
     permissions:
       contents: read 
@@ -34,8 +34,9 @@ jobs:
         continue-on-error: true
         run: |
           semgrep \
-            --config p/owasp-top-ten \
-            --sarif --output semgrep-results.sarif
+              --config p/owasp-top-ten \
+              --sarif --output semgrep-results.sarif \
+              "$TARGET_FILE"
 
       - name: Upload semgrep-results.sarif
         if: always()
