@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TARGET_FILE: "assgmt9/idor"
+      TARGET_FILE: "assgmt9/fastbank-auth-lab"
     
     permissions:
       contents: read 
