@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TARGET_FILE: "./canonicalization-example"
+      TARGET_FILE: "./idor"
     
     permissions:
       contents: read 
