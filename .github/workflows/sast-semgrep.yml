@@ -8,6 +8,9 @@ on:
 jobs: 
   semgrep:
     runs-on: ubuntu-latest
+
+    env:
+      TARGET_FILE: "assgmt9/canonicalization-example"
     
     permissions:
       contents: read 
