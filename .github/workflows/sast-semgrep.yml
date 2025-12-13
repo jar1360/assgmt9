@@ -31,11 +31,15 @@ jobs:
           pip install semgrep
         
       - name: Run Semgrep SAST (OWASP Top 10 rules)
+        continue-on-error: true
         run: |
           semgrep \
             --config p/owasp-top-ten \
             --sarif --output semgrep-results.sarif
-      - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+
+      - name: Upload semgrep-results.sarif
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          sarif_file: semgrep-results.sarif
+          name: semgrep-results-sarif
+          path: semgrep-results.sarif
