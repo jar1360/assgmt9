@@ -13,8 +13,8 @@ jobs:
   semgrep:
     runs-on: ubuntu-latest
 
-#    env:
- #     TARGET_FILE: "./fastbank-auth-lab"
+    env:
+      TARGET_FILE: "."
     
     permissions:
       contents: read 
