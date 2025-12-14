@@ -68,12 +68,11 @@ app.post('/read-no-validate', limiter, (req, res) => {
   const filename = req.body.filename || '';
   const joined = path.resolve(BASE_DIR, filename);
   if (!joined.startsWith(path.resolve(BASE_DIR) + path.sep)) {
-    throw new Error("Invalid file path");
+    return res.status(400).json({ error: "Invalid file path" });
   }
-
   
   if (!fs.existsSync(joined)) return res.status(404).json({ error: 'File not found', path: joined });
-  const content = fs.readFileSync(joined, 'utf8');
+  cconst content = fs.readFileSync(joined, 'utf8');
   res.json({ path: joined, content });
 });
 
