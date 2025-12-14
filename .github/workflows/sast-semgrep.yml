@@ -1,5 +1,9 @@
 name: SAST - Semgrep
+permissions:
+  contents: read
+  pull-requests: write
 
+  
 on:
   push:
     branches: [ main]
@@ -9,8 +13,8 @@ jobs:
   semgrep:
     runs-on: ubuntu-latest
 
-    env:
-      TARGET_FILE: "./fastbank-auth-lab"
+#    env:
+ #     TARGET_FILE: "./fastbank-auth-lab"
     
     permissions:
       contents: read 
