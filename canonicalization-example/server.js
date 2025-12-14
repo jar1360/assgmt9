@@ -4,13 +4,19 @@ const path = require('path');
 const fs = require('fs');
 const { body, validationResult } = require('express-validator');
 
+
+
 const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 const BASE_DIR = path.resolve(__dirname, 'files');
 if (!fs.existsSync(BASE_DIR)) fs.mkdirSync(BASE_DIR, { recursive: true });
+
+
+
 
 // helper to canonicalize and check
 function resolveSafe(baseDir, userInput) {
@@ -49,25 +55,29 @@ app.post(
   }
 );
 
+
+var RateLimit = require('express-rate-limit');
+var limiter = RateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100, 
+});
+
+
 // Vulnerable route (demo)
-app.post('/read-no-validate', (req, res) => {
+app.post('/read-no-validate', limiter, (req, res) => {
   const filename = req.body.filename || '';
-
-
   const joined = path.resolve(BASE_DIR, filename);
-    if (!joined.startsWith(path.resolve(BASE_DIR) + path.sep)) {
-      throw new Error("Invalid file path");
-    }
+  if (!joined.startsWith(path.resolve(BASE_DIR) + path.sep)) {
+    throw new Error("Invalid file path");
+  }
 
-
-
-
-
-
+  
   if (!fs.existsSync(joined)) return res.status(404).json({ error: 'File not found', path: joined });
   const content = fs.readFileSync(joined, 'utf8');
   res.json({ path: joined, content });
 });
+
+
 
 // Helper route for samples
 app.post('/setup-sample', (req, res) => {
