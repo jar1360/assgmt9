@@ -54,10 +54,13 @@ app.post('/read-no-validate', (req, res) => {
   const filename = req.body.filename || '';
 
 
-  const joined = path.join(BASE_DIR, path.basename(filename));
+  const safeName = path.basename(filename);
+  const joined = path.join(BASE_DIR, safeName);
 
 
-  
+
+
+
   if (!fs.existsSync(joined)) return res.status(404).json({ error: 'File not found', path: joined });
   const content = fs.readFileSync(joined, 'utf8');
   res.json({ path: joined, content });
