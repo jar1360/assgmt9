@@ -54,8 +54,11 @@ app.post('/read-no-validate', (req, res) => {
   const filename = req.body.filename || '';
 
 
-  const safeName = path.basename(filename);
-  const joined = path.join(BASE_DIR, safeName);
+  const joined = path.resolve(BASE_DIR, filename);
+    if (!joined.startsWith(path.resolve(BASE_DIR) + path.sep)) {
+      throw new Error("Invalid file path");
+    }
+
 
 
 
