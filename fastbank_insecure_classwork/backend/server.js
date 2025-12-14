@@ -7,6 +7,17 @@ const crypto = require("crypto");
 
 const app = express();
 
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+
+// Apply to all requests
+app.use(limiter);
+
+
 // --- BASIC CORS (clean, not vulnerable) ---
 app.use(
   cors({
