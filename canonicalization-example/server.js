@@ -72,7 +72,7 @@ app.post('/read-no-validate', limiter, (req, res) => {
   }
   
   if (!fs.existsSync(joined)) return res.status(404).json({ error: 'File not found', path: joined });
-  cconst content = fs.readFileSync(joined, 'utf8');
+  const content = fs.readFileSync(joined, 'utf8');
   res.json({ path: joined, content });
 });
 
