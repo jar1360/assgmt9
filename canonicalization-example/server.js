@@ -61,12 +61,22 @@ app.post(
 );
 
 // Vulnerable route (demo)
-app.post('/read-no-validate', limiter, (req, res) => {
+app.post('/read-no-validate', (req, res) => {
   const filename = req.body.filename || '';
+
   const joined = path.resolve(BASE_DIR, filename);
-  if (!joined.startsWith(path.resolve(BASE_DIR) + path.sep)) {
-    throw new Error("Invalid file path");
+  if (!joined.startsWith(BASE_DIR + path.sep)) {
+    return res.status(403).json({ error: 'Path traversal detected' });
   }
+
+  if (!fs.existsSync(joined)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+
+  const content = fs.readFileSync(joined, 'utf8');
+  res.json({ path: joined, content });
+});
+
 
   
   if (!fs.existsSync(joined)) return res.status(404).json({ error: 'File not found', path: joined });
