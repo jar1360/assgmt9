@@ -7,6 +7,8 @@ const crypto = require("crypto");
 
 const app = express();
 
+const csrf = require('lusca').csrf;
+
 const rateLimit = require('express-rate-limit');
 
 const limiter = rateLimit({
@@ -28,6 +30,7 @@ app.use(
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(csrf());
 
 // --- IN-MEMORY SQLITE DB (clean) ---
 const db = new sqlite3.Database(":memory:");
