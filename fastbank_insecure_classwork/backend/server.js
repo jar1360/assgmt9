@@ -93,9 +93,11 @@ function auth(req, res, next) {
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  const sql = `SELECT id, username, password_hash FROM users WHERE username = '${username}'`;
-
-  db.get(sql, (err, user) => {
+    db.get(
+    "SELECT id, username, password_hash FROM users WHERE username = ?",
+    [username],
+    (err, user) => {
+      
     if (!user) return res.status(404).json({ error: "Unknown username" });
 
     const candidate = fastHash(password);
@@ -127,14 +129,20 @@ app.get("/me", auth, (req, res) => {
 // ------------------------------------------------------------
 app.get("/transactions", auth, (req, res) => {
   const q = req.query.q || "";
-  const sql = `
-    SELECT id, amount, description
-    FROM transactions
-    WHERE user_id = ${req.user.id}
-      AND description LIKE '%${q}%'
-    ORDER BY id DESC
-  `;
-  db.all(sql, (err, rows) => res.json(rows));
+  
+  db.all(
+    
+  `
+  SELECT id, amount, description
+  FROM transactions
+  WHERE user_id = ?
+    AND description LIKE ?
+  ORDER BY id DESC
+  `,
+    
+  [req.user.id, `%${q}%`],
+  (err, rows) => res.json(rows)
+);
 });
 
 // ------------------------------------------------------------
@@ -147,13 +155,14 @@ app.post("/feedback", auth, (req, res) => {
   db.get(`SELECT username FROM users WHERE id = ${userId}`, (err, row) => {
     const username = row.username;
 
-    const insert = `
-      INSERT INTO feedback (user, comment)
-      VALUES ('${username}', '${comment}')
-    `;
-    db.run(insert, () => {
-      res.json({ success: true });
-    });
+    db.run(
+      "INSERT INTO feedback (user, comment) VALUES (?, ?)",
+      [username, comment],
+      () => {
+        res.json({ success: true });
+      }
+    );
+
   });
 });
 
@@ -171,12 +180,14 @@ app.post("/change-email", auth, (req, res) => {
 
   if (!newEmail.includes("@")) return res.status(400).json({ error: "Invalid email" });
 
-  const sql = `
-    UPDATE users SET email = '${newEmail}' WHERE id = ${req.user.id}
-  `;
-  db.run(sql, () => {
-    res.json({ success: true, email: newEmail });
-  });
+  db.run(
+    "UPDATE users SET email = ? WHERE id = ?",
+    [newEmail, req.user.id],
+    () => {
+      res.json({ success: true, email: newEmail });
+    }
+  );
+
 });
 
 // ------------------------------------------------------------
