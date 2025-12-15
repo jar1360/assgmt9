@@ -13,8 +13,8 @@ jobs:
   semgrep:
     runs-on: ubuntu-latest
 
-    env:
-      TARGET_FILE: "."
+#    env:
+#      TARGET_FILE: "."
     
     permissions:
       contents: read 
@@ -39,8 +39,8 @@ jobs:
         run: |
           semgrep \
               --config p/owasp-top-ten \
-              --sarif --output semgrep-results.sarif \
-              "$TARGET_FILE"
+              --sarif --output semgrep-results.sarif 
+  #          \^  "$TARGET_FILE"
 
       - name: Upload semgrep-results.sarif
         if: always()
