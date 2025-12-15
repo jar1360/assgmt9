@@ -1,9 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const crypto = require("crypto");
+//const crypto = require("crypto");
 // bcrypt is installed but NOT used in the vulnerable baseline:
 const bcrypt = require("bcrypt");
+const SALT_ROUNDS = 12;
 
 const app = express();
 const PORT = 3001;
@@ -21,14 +22,16 @@ app.use(csrf());
  * For simplicity, we start with a single user whose password is "password123".
  * In the vulnerable version, we hash with a fast hash (SHA-256-like).
  */
-const users = [
-  {
+const users = [];
+
+bcrypt.hash("password123", SALT_ROUNDS).then((hash) => {
+  users.push({
     id: 1,
     username: "student",
-    // VULNERABLE: fast hash without salt
-    passwordHash: fastHash("password123") // students must replace this scheme with bcrypt
-  }
-];
+    passwordHash: hash
+  });
+});
+
 
 // In-memory session store
 const sessions = {}; // token -> { userId }
@@ -37,9 +40,6 @@ const sessions = {}; // token -> { userId }
  * VULNERABLE FAST HASH FUNCTION
  * Students MUST STOP using this and replace logic with bcrypt.
  */
-function fastHash(password) {
-  return crypto.createHash("sha256").update(password).digest("hex");
-}
 
 // Helper: find user by username
 function findUser(username) {
@@ -75,12 +75,23 @@ app.post("/api/login", (req, res) => {
       .json({ success: false, message: "Unknown username" });
   }
 
-  const candidateHash = fastHash(password);
-  if (candidateHash !== user.passwordHash) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Wrong password" });
-  }
+  bcrypt.compare(password, user.passwordHash).then((match) => {
+    if (!match) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Wrong password" });
+    }
+  
+    const token = username + "-" + Date.now();
+    sessions[token] = { userId: user.id };
+  
+    res.cookie("session", token, { });
+  
+    res.json({ success: true, token });
+  });
+
+
+  
 
   // VULNERABLE: predictable token
   const token = username + "-" + Date.now();
