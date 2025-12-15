@@ -3,7 +3,9 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const sqlite3 = require("sqlite3").verbose();
-const crypto = require("crypto");
+const bcrypt = require("bcrypt");
+const SALT_ROUNDS = 12;
+
 
 const app = express();
 
@@ -62,7 +64,14 @@ db.serialize(() => {
     );
   `);
 
-  const passwordHash = crypto.createHash("sha256").update("password123").digest("hex");
+  bcrypt.hash("password123", SALT_ROUNDS, (err, passwordHash) => {
+    db.run(
+      `INSERT INTO users (username, password_hash, email)
+       VALUES ('ex', ?, 'ex@example.com')`,
+      [passwordHash]
+    );
+  });
+
 
   db.run(`INSERT INTO users (username, password_hash, email)
           VALUES ('alice', '${passwordHash}', 'alice@example.com');`);
@@ -74,9 +83,6 @@ db.serialize(() => {
 // --- SESSION STORE (simple, predictable token exactly like assignment) ---
 const sessions = {};
 
-function fastHash(pwd) {
-  return crypto.createHash("sha256").update(pwd).digest("hex");
-}
 
 function auth(req, res, next) {
   const sid = req.cookies.sid;
@@ -100,10 +106,22 @@ app.post("/login", (req, res) => {
       
     if (!user) return res.status(404).json({ error: "Unknown username" });
 
-    const candidate = fastHash(password);
-    if (candidate !== user.password_hash) {
-      return res.status(401).json({ error: "Wrong password" });
-    }
+
+
+      
+    bcrypt.compare(password, user.password_hash, (err, match) => {
+      if (!match) {
+        return res.status(401).json({ error: "Wrong password" });
+      }
+
+      const sid = `${username}-${Date.now()}`;
+      sessions[sid] = { userId: user.id };
+
+      res.cookie("sid", sid, {});
+      res.json({ success: true });
+    });
+
+      
 
     const sid = `${username}-${Date.now()}`; // predictable
     sessions[sid] = { userId: user.id };
