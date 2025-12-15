@@ -77,14 +77,6 @@ app.post('/read-no-validate', (req, res) => {
   res.json({ path: normalized, content });
 });
 
-
-
-  
-  if (!fs.existsSync(joined)) return res.status(404).json({ error: 'File not found', path: joined });
-  const content = fs.readFileSync(joined, 'utf8');
-  res.json({ path: joined, content });
-});
-
 // Helper route for samples
 app.post('/setup-sample', (req, res) => {
   const samples = {
